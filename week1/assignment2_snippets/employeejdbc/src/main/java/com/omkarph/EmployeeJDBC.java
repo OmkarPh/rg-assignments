@@ -39,9 +39,9 @@ class Employee {
 }
 
 public class EmployeeJDBC {
-    private static final String DB_NAME   = "tmpprojects";
+    private static final String DB_NAME = "tmpprojects";
     private static final String URL_NO_DB = "jdbc:mysql://localhost:3306/";          // <─ no schema here
-    private static final String URL       = URL_NO_DB + DB_NAME;
+    private static final String URL = URL_NO_DB + DB_NAME;
     private static final String USER = "root";
     private static final String PASSWORD = "root";
 

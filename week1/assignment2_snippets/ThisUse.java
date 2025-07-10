@@ -17,11 +17,6 @@ public class ThisUse extends Super {
     System.out.println("display method");
   }
 
-  public void st(){
-    System.out.println(this.num);
-    System.out.println(super.num);
-  }
-
   public void Show() {
     this.display();
     display();
@@ -32,6 +27,5 @@ public class ThisUse extends Super {
   public static void main(String[] args) {
     ThisUse o = new ThisUse(10);
     o.Show();
-    o.st();
   }
 }
