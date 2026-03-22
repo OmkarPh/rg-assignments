@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSES Revision</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --surface: #0f1219;
+  --surface2: #0c1020;
+  --border: #1a2235;
+  --border-hi: #2a3b5a;
+  --accent: #4f9eff;
+  --accent2: #a78bfa;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --text: #d8e4f2;
+  --text-dim: #7a95b8;
+  --muted: #415470;
+  --subtle: #111a2c;
+  --row-hover: #0d1523;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'Fira Code', monospace;
+  --display: 'Syne', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(79,158,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,158,255,0.022) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Header ────────────────────────────────────────── */
+.header {
+  position: relative; z-index: 1;
+  padding: 36px 40px 24px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(79,158,255,0.05) 0%, transparent 100%);
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.site-title {
+  font-family: var(--display);
+  font-size: clamp(24px, 3.5vw, 42px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.site-title span { color: var(--accent); }
+
+/* ─── Section bar ───────────────────────────────────── */
+.section-bar {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 14px 40px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  white-space: nowrap;
+}
+
+.select-wrap {
+  position: relative; flex: 1; min-width: 200px; max-width: 380px;
+}
+
+.select-wrap::after {
+  content: '▾'; position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%); color: var(--accent);
+  font-size: 11px; pointer-events: none;
+}
+
+select#section-picker {
+  width: 100%; appearance: none;
+  background: var(--subtle);
+  border: 1px solid var(--border-hi);
+  color: var(--text);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  padding: 8px 34px 8px 13px;
+  border-radius: 7px; cursor: pointer; outline: none;
+  transition: border-color 0.15s;
+}
+select#section-picker:hover, select#section-picker:focus { border-color: var(--accent); }
+select#section-picker option { background: #111827; color: var(--text); }
+
+.section-meta {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+}
+.section-meta strong { color: var(--accent); font-weight: 600; }
+
+/* ─── Controls ──────────────────────────────────────── */
+.controls {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  padding: 12px 40px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.ctrl-btn {
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  padding: 5px 13px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s; border: 1px solid var(--border-hi);
+  background: var(--subtle); color: var(--text-dim);
+}
+.ctrl-btn:hover { color: var(--text); background: var(--border-hi); }
+.ctrl-btn.show-all { border-color: rgba(52,211,153,.4); color: var(--green); background: rgba(52,211,153,.06); }
+.ctrl-btn.show-all:hover { background: rgba(52,211,153,.12); }
+.ctrl-btn.hide-all { border-color: rgba(251,191,36,.35); color: var(--yellow); background: rgba(251,191,36,.06); }
+.ctrl-btn.hide-all:hover { background: rgba(251,191,36,.12); }
+
+.counter { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.counter strong { color: var(--accent); }
+
+/* ─── Table ─────────────────────────────────────────── */
+.table-wrap { position: relative; z-index: 1; padding: 18px 40px; }
+
+table { width: 100%; border-collapse: separate; border-spacing: 0 3px; }
+
+thead th {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); padding: 0 14px 10px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+thead th:first-child { padding-left: 18px; }
+
+/* ─── Problem row ───────────────────────────────────── */
+.problem-row { background: var(--surface); transition: background 0.12s; }
+.problem-row:hover { background: var(--row-hover); }
+
+.problem-row td {
+  padding: 12px 14px; vertical-align: middle;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.problem-row td:first-child {
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+  border-radius: 7px 0 0 7px;
+}
+.problem-row td:last-child {
+  border-right: 1px solid var(--border);
+  border-radius: 0 7px 7px 0;
+}
+
+.problem-row.is-open td,
+.problem-row.hint-open td {
+  border-color: var(--border-hi);
+  border-bottom: none;
+  border-radius: 7px 7px 0 0;
+}
+.problem-row.is-open td:first-child,
+.problem-row.hint-open td:first-child { border-radius: 7px 0 0 0; }
+.problem-row.is-open td:last-child,
+.problem-row.hint-open td:last-child { border-radius: 0 7px 0 0; }
+
+.num {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted); width: 34px; letter-spacing: 0.03em;
+}
+
+.prob-name {
+  font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--text);
+}
+.prob-name a { color: inherit; text-decoration: none; transition: color 0.12s; }
+.prob-name a:hover { color: var(--accent); }
+
+/* Category — hidden until solution is revealed */
+.cat-cell { width: 130px; }
+
+.cat {
+  display: none;                /* ← hidden by default */
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  padding: 3px 8px; border-radius: 4px;
+  letter-spacing: 0.06em; white-space: nowrap;
+}
+/* Only show when solution row is open */
+.problem-row.is-open .cat { display: inline-block; }
+
+.cat-bfs  { background: rgba(79,158,255,.12);  color: #7ab8ff; border: 1px solid rgba(79,158,255,.25); }
+.cat-dfs  { background: rgba(167,139,250,.12); color: #c4b5fd; border: 1px solid rgba(167,139,250,.25); }
+.cat-sp   { background: rgba(52,211,153,.12);  color: #6ee7b7; border: 1px solid rgba(52,211,153,.25); }
+.cat-mst  { background: rgba(251,191,36,.12);  color: #fcd34d; border: 1px solid rgba(251,191,36,.25); }
+.cat-flow { background: rgba(251,113,133,.12); color: #fca5a5; border: 1px solid rgba(251,113,133,.25); }
+.cat-scc  { background: rgba(249,115,22,.12);  color: #fdba74; border: 1px solid rgba(249,115,22,.25); }
+.cat-misc { background: rgba(100,116,139,.12); color: #94a3b8; border: 1px solid rgba(100,116,139,.25); }
+
+/* Button group */
+.btn-group { display: flex; gap: 7px; align-items: center; justify-content: flex-end; }
+
+.hint-toggle {
+  background: transparent;
+  border: 1px solid rgba(251,191,36,.28);
+  color: rgba(251,191,36,.6);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  padding: 5px 11px; border-radius: 5px; cursor: pointer;
+  transition: all 0.14s;
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+.hint-toggle:hover { background: rgba(251,191,36,.08); color: var(--yellow); border-color: var(--yellow); }
+.hint-toggle.active { background: rgba(251,191,36,.09); color: var(--yellow); border-color: var(--yellow); }
+
+.hchev { display: inline-block; transition: transform 0.17s; font-style: normal; line-height: 1; }
+.hint-toggle.active .hchev { transform: rotate(90deg); }
+
+.toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-hi);
+  color: var(--text-dim);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  padding: 5px 11px; border-radius: 5px; cursor: pointer;
+  transition: all 0.14s;
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+.toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,158,255,.07); }
+.problem-row.is-open .toggle-btn { border-color: var(--accent2); color: var(--accent2); background: rgba(167,139,250,.08); }
+
+.schev { display: inline-block; transition: transform 0.17s; font-style: normal; line-height: 1; }
+.problem-row.is-open .schev { transform: rotate(90deg); }
+
+/* ─── Hint row ──────────────────────────────────────── */
+.hint-row { display: none; }
+.hint-row.open { display: table-row; }
+
+.hint-row td {
+  padding: 0;
+  border-left:  1px solid rgba(251,191,36,.28);
+  border-right: 1px solid rgba(251,191,36,.28);
+  border-bottom: 1px solid rgba(251,191,36,.16);
+  background: rgba(251,191,36,.025);
+}
+
+.hint-row-inner { padding: 14px 16px 16px 68px; }
+
+.hint-row-title {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(251,191,36,.5); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.hint-row-title::after { content: ''; flex: 1; height: 1px; background: rgba(251,191,36,.1); }
+
+.hint-step { display: flex; gap: 11px; margin-bottom: 8px; align-items: flex-start; }
+.hint-step:last-child { margin-bottom: 0; }
+
+.hint-num {
+  flex-shrink: 0; width: 19px; height: 19px; border-radius: 50%;
+  background: rgba(251,191,36,.09); border: 1px solid rgba(251,191,36,.25);
+  color: var(--yellow); font-family: var(--mono); font-size: 9px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.hint-text {
+  font-family: var(--sans); font-size: 13px;
+  color: var(--text-dim); line-height: 1.65; padding-top: 1px;
+}
+
+/* ─── Solution (detail) row ─────────────────────────── */
+.detail-row { display: none; }
+.detail-row.open { display: table-row; }
+
+.detail-row td {
+  padding: 0;
+  border: 1px solid var(--border-hi);
+  border-top: none;
+  border-radius: 0 0 7px 7px;
+  background: var(--surface2);
+}
+
+.hint-row.open + .detail-row.open td {
+  border-top: 1px solid var(--border-hi);
+}
+
+.detail-inner {
+  padding: 16px 16px 18px 68px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+}
+
+.detail-section h3 {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.detail-section h3::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.approach-block {
+  margin-bottom: 9px; padding: 11px 13px;
+  background: var(--subtle); border-radius: 6px;
+  border-left: 3px solid var(--accent);
+}
+.approach-block:last-child { margin-bottom: 0; }
+
+.approach-title {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  color: var(--accent); margin-bottom: 5px; letter-spacing: 0.01em;
+}
+
+.approach-desc {
+  font-family: var(--sans); font-size: 13px;
+  color: var(--text-dim); line-height: 1.65;
+}
+
+.tc-block {
+  margin-bottom: 9px; padding: 10px 13px;
+  background: var(--subtle); border-radius: 6px;
+  border-left: 3px solid var(--green);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.tc-block:last-child { margin-bottom: 0; }
+
+.tc-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+.tc-value { font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 500; letter-spacing: 0.02em; }
+.tc-note  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+.tc-explain {
+  font-family: var(--sans); font-size: 12.5px;
+  color: var(--text-dim); line-height: 1.62;
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── Responsive ────────────────────────────────────── */
+@media (max-width: 800px) {
+  .header, .section-bar, .controls { padding-left: 16px; padding-right: 16px; }
+  .table-wrap { padding: 12px 14px; }
+  .detail-inner { grid-template-columns: 1fr; padding-left: 16px; }
+  .hint-row-inner { padding-left: 16px; }
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">// cses.fi / problemset</div>
+  <div class="site-title">CSES <span>Revision</span></div>
+</div>
+
+<div class="section-bar">
+  <span class="section-label">Section</span>
+  <div class="select-wrap">
+    <select id="section-picker" onchange="onSectionChange(this.value)"></select>
+  </div>
+  <span class="section-meta" id="section-meta"></span>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn show-all" onclick="toggleAll(true)">▶ Show All</button>
+  <button class="ctrl-btn hide-all" onclick="toggleAll(false)">▼ Hide All</button>
+  <span class="counter"><strong id="open-count">0</strong> / <span id="total-count">0</span> revealed</span>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Problem</th>
+        <th>Category</th>
+        <th style="text-align:right;padding-right:18px"></th>
+      </tr>
+    </thead>
+    <tbody id="problem-table"></tbody>
+  </table>
+</div>
+
+<script>
+// ── CSES sections in platform order ───────────────────────
+const SECTIONS = [
+  { key: 'intro',      label: 'Introductory Problems' },
+  { key: 'sorting',   label: 'Sorting and Searching' },
+  { key: 'dp',         label: 'Dynamic Programming' },
+  { key: 'graph',      label: 'Graph Algorithms' },
+  { key: 'range',      label: 'Range Queries' },
+  { key: 'tree',       label: 'Tree Algorithms' },
+  { key: 'math',       label: 'Mathematics' },
+  { key: 'string',     label: 'String Algorithms' },
+  { key: 'geo',        label: 'Geometry' },
+  { key: 'advanced',   label: 'Advanced Techniques' },
+  { key: 'additional', label: 'Additional Problems' },
+];
+
+// ── Problem data ───────────────────────────────────────────
+const PROBLEMS = {
+
+graph: [
+  { id:1192, name:"Counting Rooms",      cat:"dfs",  catLabel:"DFS/BFS",
+    approaches:[{title:"Flood Fill (DFS/BFS)",desc:"For each unvisited '.' cell, launch DFS/BFS to mark the connected room. Count how many fresh traversals you start."}],
+    tcs:[{label:"DFS/BFS",tc:"O(N·M)",note:"grid N×M",explain:"Every cell visited once, 4 neighbours each — total work linear in grid size."}],
+    hints:["Each connected group of '.' cells is one room — count connected components.","Every fresh DFS/BFS launch from an unvisited cell = one new room.","Mark cells visited on entry so the same room isn't counted twice."]},
+
+  { id:1193, name:"Labyrinth",           cat:"bfs",  catLabel:"BFS",
+    approaches:[{title:"BFS + Path Reconstruction",desc:"BFS on grid from A. Track parent cell and direction taken. Trace back from B when reached."}],
+    tcs:[{label:"BFS",tc:"O(N·M)",note:"",explain:"Each cell enqueued/dequeued once. Parent tracing adds at most O(N·M) more steps."}],
+    hints:["BFS on grids gives shortest path by step count — each cell is a node, moves are edges.","Store parent[r][c] = which cell we came from. Trace back from B to A after BFS.","Also store the direction used to enter each cell to print the move string directly."]},
+
+  { id:1666, name:"Building Roads",      cat:"dfs",  catLabel:"DSU/BFS",
+    approaches:[{title:"Connected Components",desc:"Find components via DFS/BFS/DSU. k components need k−1 roads connecting one representative from each."}],
+    tcs:[{label:"DFS/BFS",tc:"O(N + M)",note:"DSU: O(α·N)",explain:"DFS/BFS visits every node and edge once. DSU with path compression + union by rank is near-constant per operation."}],
+    hints:["Count connected components first. Answer = (components − 1) roads.","Pick one representative node per component. Connect them with k−1 edges.","DSU is the cleanest approach: union nodes on each edge, collect roots."]},
+
+  { id:1667, name:"Message Route",       cat:"bfs",  catLabel:"BFS",
+    approaches:[{title:"BFS Shortest Path",desc:"BFS from node 1, store parents. If N is reached, reconstruct path. Otherwise IMPOSSIBLE."}],
+    tcs:[{label:"BFS",tc:"O(N + M)",note:"",explain:"Each node enters the queue once (O(N)), each edge scanned once (O(M)). Path reconstruction ≤ O(N)."}],
+    hints:["BFS from node 1 on an unweighted graph gives minimum-hop path.","Store parent[v]. After reaching N, trace N → parent[N] → … → 1, then reverse.","If N is never visited, print IMPOSSIBLE."]},
+
+  { id:1668, name:"Building Teams",      cat:"bfs",  catLabel:"2-Coloring",
+    approaches:[{title:"Bipartiteness Check",desc:"BFS/DFS 2-color the graph. Same-color edge = IMPOSSIBLE; else output colors."}],
+    tcs:[{label:"BFS 2-color",tc:"O(N + M)",note:"",explain:"Standard BFS — every node colored once, every edge checked once."}],
+    hints:["Can you assign each node team 0 or 1 so no edge joins same-team nodes? That's bipartiteness.","BFS: color start 0, neighbors 1, their neighbors 0. Conflict → IMPOSSIBLE.","Run from every unvisited node to handle disconnected graphs."]},
+
+  { id:1669, name:"Round Trip",          cat:"dfs",  catLabel:"DFS",
+    approaches:[{title:"Cycle via DFS Back-Edge",desc:"DFS with a stack. Back-edge to ancestor = cycle. Extract cycle from stack. Need ≥ 3 nodes."}],
+    tcs:[{label:"DFS",tc:"O(N + M)",note:"",explain:"DFS visits each node and edge once. Cycle extraction walks the DFS stack ≤ O(N)."}],
+    hints:["Cycle exists when DFS finds an edge back to a node still on the current recursion stack.","Keep a path stack. Back-edge u→v: cycle = stack from v to u, plus this edge.","Need at least 3 distinct nodes. Output IMPOSSIBLE if none found."]},
+
+  { id:1194, name:"Monsters",            cat:"bfs",  catLabel:"Multi-BFS",
+    approaches:[{title:"Multi-source BFS + Player BFS",desc:"BFS from all monsters simultaneously → monster-arrival grid. Then BFS player, only stepping to cells where player arrives strictly earlier."}],
+    tcs:[{label:"Multi-source BFS",tc:"O(N·M)",note:"",explain:"Two BFS passes each visit every cell at most once — O(N·M) total."}],
+    hints:["Precompute earliest monster arrival at every cell via one multi-source BFS (all monsters as sources).","Player BFS from 'A': only enter cell if player_time < monster_time there.","If player reaches a border cell, escape! Reconstruct path with parent pointers."]},
+
+  { id:1671, name:"Shortest Routes I",   cat:"sp",   catLabel:"Dijkstra",
+    approaches:[{title:"Dijkstra (single source)",desc:"Min-heap Dijkstra from node 1. Relax edges greedily. Output dist[1..N]."}],
+    tcs:[{label:"Dijkstra",tc:"O((N+M) log N)",note:"directed, weighted",explain:"N heap extractions + M heap insertions, each O(log N). Total O((N+M) log N)."}],
+    hints:["Classic SSSP on directed weighted graph. Use a min-heap.","dist[1]=0, all others ∞. Always process smallest-dist unvisited node next.","Relax edge u→v: if dist[u]+w < dist[v], update and push to heap."]},
+
+  { id:1672, name:"Shortest Routes II",  cat:"sp",   catLabel:"Floyd-Warshall",
+    approaches:[{title:"All-Pairs Shortest Paths",desc:"Floyd-Warshall O(N³). Init with edge weights, triple-loop relaxation. Answer queries in O(1)."}],
+    tcs:[{label:"Floyd-Warshall",tc:"O(N³ + Q)",note:"N ≤ 500",explain:"Three nested loops over N give O(N³). With N=500 that's ~1.25×10⁸ — just feasible. Q queries are O(1) each."}],
+    hints:["All-pairs shortest paths. With N ≤ 500, Floyd-Warshall's O(N³) fits in time.","Initialize dist[i][j] = min edge weight (∞ if none, 0 if i==j). For multi-edges take min.","Triple loop: for k in 1..N: for i,j: dist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j])."]},
+
+  { id:1673, name:"High Score",          cat:"sp",   catLabel:"Bellman-Ford",
+    approaches:[{title:"Longest Path / Positive Cycle",desc:"Negate weights → longest path = shortest path. Bellman-Ford. Positive cycle reachable to N → output −1."}],
+    tcs:[{label:"Bellman-Ford",tc:"O(N·M)",note:"",explain:"N−1 relaxation rounds × M edges = O(N·M). Extra round N detects positive cycles."}],
+    hints:["Maximize score = longest path. Negate edge weights to convert to shortest path.","Run Bellman-Ford on negated graph. Extra Nth round: if any edge still relaxes and node can reach N → output −1.","Answer is −dist[N] (negate back)."]},
+
+  { id:1676, name:"Flight Discount",     cat:"sp",   catLabel:"Dijkstra",
+    approaches:[{title:"State-space Dijkstra",desc:"State (node, coupon_used ∈ {0,1}). Dijkstra on 2N nodes. Optionally halve edge weight when using coupon."}],
+    tcs:[{label:"Dijkstra on 2N states",tc:"O((N+M) log N)",note:"",explain:"State space doubles by constant factor 2. Dijkstra complexity unchanged asymptotically."}],
+    hints:["Add a boolean dimension to state: coupon used or not?","State = (node, used). From (u,0) on edge w: go to (v,0) with cost w, or (v,1) with cost w/2.","Answer = min(dist[N][0], dist[N][1])."]},
+
+  { id:1678, name:"Cycle Finding",       cat:"sp",   catLabel:"Bellman-Ford",
+    approaches:[{title:"Detect Negative Cycle",desc:"Run N Bellman-Ford rounds. Relaxation in round N → negative cycle. Walk N parent pointers to land inside it."}],
+    tcs:[{label:"Bellman-Ford",tc:"O(N·M)",note:"",explain:"One extra O(M) round beyond N−1. Walking N parent pointers is O(N). Total still O(N·M)."}],
+    hints:["Bellman-Ford normally does N−1 rounds. If any edge relaxes in round N, a negative cycle exists.","From that updated node, follow parent[] N times — guaranteed to land inside the cycle.","Walk the cycle via parent[] until a node repeats — collect and print it."]},
+
+  { id:1679, name:"Flight Routes",       cat:"sp",   catLabel:"Dijkstra",
+    approaches:[{title:"K-Shortest Paths",desc:"Modified Dijkstra: allow each node to be popped up to K times. The Kth pop of N gives the Kth shortest."}],
+    tcs:[{label:"K-Dijkstra",tc:"O(K·M log(KN))",note:"",explain:"Each of N nodes pushed up to K times → K·N heap entries. M edges × K insertions. Log factor from heap size K·N."}],
+    hints:["Let each node be popped from the heap up to K times instead of once.","Track pop_count[v]. Process v's edges only if pop_count[v] ≤ K.","The Kth time node N is popped = Kth shortest distance."]},
+
+  { id:1680, name:"Round Trip II",       cat:"dfs",  catLabel:"DFS",
+    approaches:[{title:"Directed Graph Cycle",desc:"3-color DFS: WHITE/GRAY/BLACK. Back-edge to GRAY node → cycle. Reconstruct via parent pointers."}],
+    tcs:[{label:"DFS",tc:"O(N + M)",note:"directed",explain:"Each node visited once, each directed edge examined once. Stack traversal for cycle extraction ≤ O(N)."}],
+    hints:["3-color DFS: unvisited (WHITE), on current path (GRAY), fully processed (BLACK).","Edge to a GRAY node is a back-edge → cycle exists. Cycle = DFS stack from target to current.","Record parent[] during DFS. Trace from cycle-end back to cycle-start."]},
+
+  { id:1681, name:"Course Schedule",     cat:"misc", catLabel:"Topo Sort",
+    approaches:[{title:"Kahn's Algorithm",desc:"BFS-based topo sort. Remove 0-indegree nodes iteratively. Cycle detected if < N nodes processed."}],
+    tcs:[{label:"Kahn's BFS",tc:"O(N + M)",note:"",explain:"Each node enqueued once (O(N)), each edge processed once when source is dequeued (O(M))."}],
+    hints:["Process courses with no prerequisites first — that's topological sort.","Kahn's: queue all 0-indegree nodes, pop, add to order, decrement neighbors' indegrees, enqueue newly zero ones.","If < N nodes processed → cycle → IMPOSSIBLE."]},
+
+  { id:1682, name:"Longest Flight Route", cat:"sp",  catLabel:"DAG DP",
+    approaches:[{title:"DP on topological order",desc:"Topo-sort. dp[v] = max(dp[u]+1) for each edge u→v. Track parents for path reconstruction."}],
+    tcs:[{label:"Topo DP",tc:"O(N + M)",note:"",explain:"Topo sort O(N+M). One O(1) comparison per edge in DP pass. Path reconstruction O(N)."}],
+    hints:["Longest path in a DAG — topo order guarantees all predecessors are ready.","dp[v] = max(dp[u]+1) over in-edges u→v. dp[1]=1, rest = −∞ initially.","Track parent[v]. If dp[N] is −∞ after DP, output IMPOSSIBLE."]},
+
+  { id:1683, name:"Game Routes",         cat:"sp",   catLabel:"DAG DP",
+    approaches:[{title:"Count paths in DAG",desc:"Topo-sort. dp[v] = Σdp[u] for all u→v. dp[1]=1. Answer = dp[N] mod 1e9+7."}],
+    tcs:[{label:"Topo DP",tc:"O(N + M)",note:"",explain:"Same structure as longest path DP. One addition per edge, all O(1). Modular reduction at each step."}],
+    hints:["Count paths from 1 to N in a DAG.","dp[v] = sum of dp[u] for each in-edge u→v. dp[1] = 1.","Modulo 1e9+7 at every addition to avoid overflow."]},
+
+  { id:1684, name:"Investigation",       cat:"sp",   catLabel:"Dijkstra",
+    approaches:[{title:"Dijkstra with multi-value tracking",desc:"Track (min_dist, count, min_flights, max_flights) per node. Update all four on each relaxation."}],
+    tcs:[{label:"Dijkstra",tc:"O((N+M) log N)",note:"",explain:"Four values per node adds a constant factor to each relaxation but doesn't change operation count — same asymptotic as standard Dijkstra."}],
+    hints:["Run Dijkstra but maintain 4 values per node: (dist, path_count, min_hops, max_hops).","Equal dist → accumulate count and update min/max hops. Better dist → reset all four.","Initialize node 1 as (0, 1, 0, 0). Use mod for count."]},
+
+  { id:1685, name:"Planets Queries I",   cat:"misc", catLabel:"Binary Lifting",
+    approaches:[{title:"Sparse Table on Functional Graph",desc:"anc[v][k] = 2^k-th step from v. Build level-by-level. Query by binary decomposition of t."}],
+    tcs:[{label:"Build O(N log N)",tc:"Query O(log N)",note:"",explain:"N nodes × log N levels, each filled in O(1). Query decomposes t into ≤ 30 bits."}],
+    hints:["Every planet has exactly one teleporter — a functional graph. Need node after t steps from v.","Precompute anc[v][k] = 2^k-th successor. anc[v][0]=teleporter[v], anc[v][k]=anc[anc[v][k−1]][k−1].","For query (v,t): for each set bit k in t, jump v = anc[v][k]."]},
+
+  { id:1686, name:"Planets Queries II",  cat:"misc", catLabel:"Binary Lifting",
+    approaches:[{title:"Functional Graph + Cycles",desc:"Components are ρ-shaped. Binary lift to cycle entry. Modular arithmetic on cycle for intra-cycle distances."}],
+    tcs:[{label:"Build O(N log N)",tc:"Query O(log N)",note:"",explain:"Cycle detection O(N). Sparse table O(N log N). Each query ≤ O(log N) jumps + O(1) cycle arithmetic."}],
+    hints:["Each functional graph component is rho-shaped: a tail into a cycle. Find which nodes are on cycles and cycle lengths.","For query (u,v): advance u to cycle entry using binary lifting, then modular arithmetic within cycle.","If v isn't reachable from u (e.g. u already past v on the tail), output −1."]},
+
+  { id:1687, name:"Planets Cycles",      cat:"dfs",  catLabel:"DFS",
+    approaches:[{title:"Cycle Length in Functional Graph",desc:"3-color DFS on functional graph. On revisit of in-chain node, measure cycle. For tail nodes: dist[v] = dist[succ]+1."}],
+    tcs:[{label:"DFS",tc:"O(N)",note:"functional graph",explain:"Exactly N edges (one per node). Each node visited once — both cycle detection and dist computation are O(N)."}],
+    hints:["Follow chains; the chain loops back → that's the cycle. Measure its length.","3-color nodes: unvisited / in-chain / done. Revisit of in-chain node = cycle entry.","Tail nodes: dist[v] = dist[successor]+1. Memoize once successor is resolved."]},
+
+  { id:1688, name:"Giant Pizza",         cat:"misc", catLabel:"2-SAT",
+    approaches:[{title:"2-SAT via SCC",desc:"Clause (a OR b) → implications ¬a→b and ¬b→a. Build graph, find SCCs (Tarjan). xᵢ = true iff comp(xᵢ) > comp(¬xᵢ) in reverse topo order."}],
+    tcs:[{label:"Tarjan SCC",tc:"O(N + M)",note:"",explain:"2N nodes, 2M edges in implication graph. Tarjan O(V+E). Assignment pass O(N)."}],
+    hints:["Each constraint 'at least one of ±a, ±b' is a 2-SAT clause: equivalent to (¬a→b) AND (¬b→a).","Build implication graph with 2N nodes. Find SCCs with Tarjan or Kosaraju.","If xᵢ and ¬xᵢ share an SCC → IMPOSSIBLE. Else xᵢ = true iff SCC(xᵢ) is later in topo order than SCC(¬xᵢ)."]},
+
+  { id:1689, name:"Coin Collector",      cat:"scc",  catLabel:"SCC + DP",
+    approaches:[{title:"SCC Condensation + DAG DP",desc:"Find SCCs, sum coins in each. Condense to DAG. DP for max-weight path from any source with indegree 0."}],
+    tcs:[{label:"Tarjan + DAG DP",tc:"O(N + M)",note:"",explain:"Tarjan O(N+M). Condensation O(N+M). DAG DP processes each condensed node/edge once — still O(N+M)."}],
+    hints:["Within an SCC you can collect all coins. Treat each SCC as one super-node with value = sum of coins.","Condense graph: SCC → node, inter-SCC edges remain (deduplicate). Result is a DAG.","Max-weight path DP on condensed DAG. Initialize all source SCCs (indegree=0) with their coin sum."]},
+
+  { id:1690, name:"Mail Delivery",       cat:"misc", catLabel:"Eulerian",
+    approaches:[{title:"Hierholzer's Algorithm",desc:"Check: all degrees even + graph connected. Then Hierholzer's: follow edges until stuck, splice sub-tours."}],
+    tcs:[{label:"Hierholzer's",tc:"O(N + M)",note:"",explain:"Each edge traversed and removed exactly once. Sub-tour splicing is O(1) amortized per edge."}],
+    hints:["Eulerian circuit exists iff every vertex has even degree AND graph is connected (ignoring isolated nodes).","Check both conditions first. Fail either → IMPOSSIBLE.","Hierholzer's: follow edges greedily until stuck, then splice sub-tours at nodes with unused edges."]},
+
+  { id:1691, name:"De Bruijn Sequence",  cat:"misc", catLabel:"Eulerian",
+    approaches:[{title:"Eulerian Circuit on de Bruijn Graph",desc:"Nodes = (k−1)-bit strings, edges = k-bit strings. Eulerian circuit traversal gives the de Bruijn sequence."}],
+    tcs:[{label:"Hierholzer's",tc:"O(2^k)",note:"",explain:"2^(k−1) nodes, 2^k edges. Build O(2^k). Hierholzer's traverses each edge once."}],
+    hints:["Every k-bit string should appear as a substring once. Model: nodes are (k−1)-bit strings, each k-bit string is a directed edge.","Each edge shifts a bit into the node. An Eulerian circuit uses every edge exactly once → de Bruijn sequence.","Apply Hierholzer's on this directed graph."]},
+
+  { id:1692, name:"Teleporters Path",    cat:"misc", catLabel:"Eulerian",
+    approaches:[{title:"Eulerian Path (directed)",desc:"Check degree conditions: one node out−in=1 (start), one in−out=1 (end), rest equal. Check connectivity. Hierholzer's on directed graph."}],
+    tcs:[{label:"Hierholzer's directed",tc:"O(N + M)",note:"",explain:"Degree check O(N+M). Connectivity check O(N+M). Hierholzer's visits each edge once — total O(N+M)."}],
+    hints:["Directed Eulerian path requires: exactly one node with out−in=1 (start), one with in−out=1 (end), all others equal. Plus connectivity.","Fail any condition → IMPOSSIBLE.","Directed Hierholzer's: follow outgoing edges, marking used ones, splice sub-paths where needed."]},
+
+  { id:1693, name:"Hamiltonian Flights", cat:"misc", catLabel:"Bitmask DP",
+    approaches:[{title:"Hamiltonian Path DP",desc:"dp[mask][v] = count of paths visiting exactly mask, ending at v. Transition: dp[mask|(1<<v)][v] += dp[mask][u] for each u→v."}],
+    tcs:[{label:"Bitmask DP",tc:"O(2^N · N)",note:"N ≤ 20",explain:"2^N subsets × N ending nodes = 2^N·N states. Each transition O(1) amortized over edges."}],
+    hints:["State: dp[mask][v] = number of paths visiting exactly the nodes in mask, ending at v.","Transition: dp[mask|(1<<v)][v] += dp[mask][u] for each edge u→v, if v not already in mask.","Base: dp[1<<0][0] = 1. Answer: dp[(1<<N)−1][N−1] mod 1e9+7."]},
+
+  { id:1694, name:"Knight's Tour",       cat:"misc", catLabel:"Warnsdorff",
+    approaches:[{title:"Warnsdorff's Heuristic",desc:"Always move to the neighbor with fewest onward moves. Single greedy pass finds a complete tour on 8×8."}],
+    tcs:[{label:"Warnsdorff greedy",tc:"O(N²) empirically",note:"heuristic",explain:"N² cells visited, ≤8 moves evaluated per cell. No backtracking needed — O(8·N²) = O(N²)."}],
+    hints:["Naive backtracking is exponential. Warnsdorff's heuristic works in one greedy pass.","Always move the knight to the unvisited cell with the fewest onward moves.","For 8×8 board this always finds a complete tour. Break ties by any consistent rule."]},
+
+  { id:1695, name:"Download Speed",      cat:"flow", catLabel:"Max Flow",
+    approaches:[{title:"Dinic's Max Flow",desc:"Node 1 = source, N = sink. Dinic's: BFS builds level graph, DFS finds blocking flow. Repeat until no augmenting path."}],
+    tcs:[{label:"Dinic's",tc:"O(V²·E)",note:"fast in practice",explain:"At most V BFS phases (path length increases each time). Each blocking-flow DFS costs O(V·E). Practical performance is much better on typical inputs."}],
+    hints:["Direct max-flow: node 1 = source, node N = sink.","Dinic's: BFS to build level graph (shortest augmenting path), then DFS to find blocking flow. Repeat.","Maintain residual graph: each edge u→v (cap c) gets a reverse edge v→u (cap 0). Push flow, adjust both."]},
+
+  { id:1696, name:"Police Chase",        cat:"flow", catLabel:"Min Cut",
+    approaches:[{title:"Max-Flow Min-Cut",desc:"Max flow = min cut by theorem. After Dinic's, BFS residual graph from source. Saturated edges crossing S→T side form the cut."}],
+    tcs:[{label:"Dinic's + BFS",tc:"O(V²·E)",note:"",explain:"Dinic's dominates. Final BFS to find min-cut partition is O(V+E) — negligible."}],
+    hints:["Min-cut equals max-flow by the max-flow min-cut theorem.","Run Dinic's for max flow. Then BFS on residual graph from node 1 — reachable nodes = S-side.","Original edges from S-side to T-side with zero residual capacity = the min cut. Print these edges."]},
+
+  { id:1697, name:"School Dance",        cat:"flow", catLabel:"Bipartite Match",
+    approaches:[{title:"Hopcroft-Karp / Dinic's",desc:"Source → boys (cap 1), girls → sink (cap 1), pair edges (cap 1). Max flow = matching. Extract pairs from saturated edges."}],
+    tcs:[{label:"Hopcroft-Karp",tc:"O(E √V)",note:"",explain:"At most O(√V) BFS phases (proof via augmenting path length argument). Each phase DFS costs O(E)."}],
+    hints:["Bipartite matching via max flow: source → boys, boys → girls (valid pairs), girls → sink, all capacity 1.","Max flow = max matching size.","Matched pairs = boy→girl edges with residual capacity 0 (flow = 1)."]},
+
+  { id:1699, name:"Distinct Routes",     cat:"flow", catLabel:"Edge-Disjoint",
+    approaches:[{title:"Edge-Disjoint Paths",desc:"Capacity 1 per edge. Max flow = count of edge-disjoint paths. Reconstruct each by DFS on flow graph, zeroing used edges."}],
+    tcs:[{label:"Dinic's",tc:"O(E · F)",note:"F = max flow",explain:"Unit capacities: each augmenting path saturates at least one edge. DFS per path = O(E). Total O(E·F) where F ≤ N."}],
+    hints:["Set capacity 1 on every edge. Max flow = number of edge-disjoint paths from 1 to N.","Reconstruct: DFS from node 1, follow flow=1 edges, zero them out to avoid reuse.","Print max flow value then each path."]},
+],
+
+intro: [
+  {id:1068,name:"Weird Algorithm",       cat:"misc",catLabel:"Simulation",   approaches:[{title:"Collatz Sequence",desc:"Apply n→n/2 if even, n→3n+1 if odd. Repeat until n=1."}],tcs:[{label:"Simulation",tc:"O(steps)",note:"terminates empirically"}]},
+  {id:1083,name:"Missing Number",        cat:"misc",catLabel:"Math",         approaches:[{title:"Sum formula",desc:"Expected = N*(N+1)/2. Subtract given sum."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1069,name:"Gray Code",             cat:"misc",catLabel:"Bit Tricks",   approaches:[{title:"i XOR (i>>1)",desc:"G(i) = i ^ (i>>1). Enumerate 0..2^n-1."}],tcs:[{label:"O(2^n)",tc:"O(2^n)",note:""}]},
+  {id:1094,name:"Tower of Hanoi",        cat:"misc",catLabel:"Recursion",    approaches:[{title:"3-peg recursion",desc:"Move n-1 to aux, move bottom to dst, move n-1 from aux to dst."}],tcs:[{label:"O(2^n)",tc:"O(2^n)",note:"2^n−1 moves"}]},
+  {id:1070,name:"Permutations",          cat:"misc",catLabel:"Construction", approaches:[{title:"Interleave even/odd",desc:"Place all even numbers then all odd numbers (or vice versa) to avoid adjacent consecutive values."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1071,name:"Number Spiral",         cat:"misc",catLabel:"Math",         approaches:[{title:"Diagonal formula",desc:"Find which diagonal (r,c) lies on, then compute its position along that diagonal."}],tcs:[{label:"O(1)",tc:"O(1) per query",note:""}]},
+  {id:1072,name:"Two Knights",           cat:"misc",catLabel:"Combinatorics",approaches:[{title:"Inclusion-exclusion",desc:"Total pairs C(k²,2) minus attacking pairs. Attacking-pair count has a closed form."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1092,name:"Two Sets",              cat:"misc",catLabel:"DSU",          approaches:[{title:"Pair i with N+1−i",desc:"Sum must be N(N+1)/4. Pair each i with its complement. DSU to validate and build sets."}],tcs:[{label:"DSU",tc:"O(N α(N))",note:""}]},
+  {id:1617,name:"Bit Strings",           cat:"misc",catLabel:"Math",         approaches:[{title:"2^n mod 1e9+7",desc:"Fast exponentiation."}],tcs:[{label:"Fast exp",tc:"O(log N)",note:""}]},
+  {id:1618,name:"Trailing Zeros",        cat:"misc",catLabel:"Math",         approaches:[{title:"Count factors of 5",desc:"Trailing zeros = Σ⌊N/5^k⌋ for k=1,2,…"}],tcs:[{label:"O(log N)",tc:"O(log N)",note:""}]},
+  {id:1754,name:"Coin Piles",            cat:"misc",catLabel:"Math",         approaches:[{title:"Divisibility check",desc:"Check (a+b)%3==0 and neither > 2×other."}],tcs:[{label:"O(1)",tc:"O(1)",note:""}]},
+  {id:1755,name:"Palindrome Reorder",    cat:"misc",catLabel:"Greedy",       approaches:[{title:"Count odd-freq chars",desc:"At most 1 odd-frequency character. Build palindrome by placing half of each char on each side."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1622,name:"Creating Strings",      cat:"misc",catLabel:"Permutations", approaches:[{title:"next_permutation",desc:"Sort string, enumerate all unique permutations with next_permutation."}],tcs:[{label:"O(n!·n)",tc:"O(n!·n)",note:""}]},
+  {id:1623,name:"Apple Division",        cat:"misc",catLabel:"Bitmask",      approaches:[{title:"Enumerate 2^n subsets",desc:"For each subset, compute |sum1 − sum2|. Minimize."}],tcs:[{label:"O(2^n·n)",tc:"O(2^n·n)",note:"n≤20"}]},
+  {id:1624,name:"Chessboard and Queens", cat:"misc",catLabel:"Backtracking", approaches:[{title:"N-Queens + constraints",desc:"Standard N-Queens backtracking with blocked cells."}],tcs:[{label:"O(N!)",tc:"O(N!)",note:"N=8"}]},
+  {id:1625,name:"Digit Queries",         cat:"misc",catLabel:"Math",         approaches:[{title:"Binary search on digit blocks",desc:"Count digits in 1-digit, 2-digit, etc. blocks. Find which number and digit offset."}],tcs:[{label:"O(log k)",tc:"O(log k)",note:""}]},
+  {id:1626,name:"Grid Paths",            cat:"misc",catLabel:"Backtracking", approaches:[{title:"DFS + aggressive pruning",desc:"Prune if current path cuts grid into two parts, each with unvisited cells."}],tcs:[{label:"Backtracking+pruning",tc:"O(1) effectively",note:"7×7"}]},
+],
+
+sorting: [
+  {id:1621,name:"Distinct Numbers",        cat:"misc",catLabel:"Sorting",       approaches:[{title:"Sort + count unique",desc:"Sort, count elements ≠ previous."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1084,name:"Apartments",              cat:"misc",catLabel:"Two Pointers",  approaches:[{title:"Sort both + 2-pointer",desc:"Greedily match applicant i to apartment j if |a[i]−b[j]|≤k."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1090,name:"Ferris Wheel",            cat:"misc",catLabel:"Two Pointers",  approaches:[{title:"Sort + pair lightest/heaviest",desc:"Greedy: pair lightest with heaviest if they fit; else heaviest rides alone."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1091,name:"Concert Tickets",         cat:"misc",catLabel:"Multiset",      approaches:[{title:"Multiset + upper_bound",desc:"Maintain ticket prices in multiset. For each customer find largest ≤ budget, erase it."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1619,name:"Restaurant Customers",    cat:"misc",catLabel:"Sweep Line",    approaches:[{title:"Event sweep on arrival/departure",desc:"Create +1/-1 events. Sweep to track current count, record max."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1629,name:"Movie Festival",          cat:"misc",catLabel:"Greedy",        approaches:[{title:"Sort by end time, greedy",desc:"Sort by end time. Greedily pick movie if it starts ≥ last chosen end."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1640,name:"Sum of Two Values",       cat:"misc",catLabel:"Two Pointers",  approaches:[{title:"Sort + two pointers",desc:"Sort with indices. Converge from both ends."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1643,name:"Maximum Subarray Sum",    cat:"misc",catLabel:"Kadane's",      approaches:[{title:"Kadane's algorithm",desc:"Running sum; reset to 0 when negative. Track global max."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1074,name:"Stick Lengths",           cat:"misc",catLabel:"Median",        approaches:[{title:"Minimize sum |x−aᵢ|",desc:"Optimal x = median. Sort, pick middle element, compute cost."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:2183,name:"Missing Coin Sum",        cat:"misc",catLabel:"Greedy",        approaches:[{title:"Sort + reachable sum",desc:"Sort coins. If next coin > reachable+1, answer = reachable+1. Else extend reach."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1645,name:"Nearest Smaller Values",  cat:"misc",catLabel:"Stack",         approaches:[{title:"Monotone decreasing stack",desc:"For each element, pop stack while top ≥ current. Top = answer."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1660,name:"Room Allocation",         cat:"misc",catLabel:"Greedy+Heap",   approaches:[{title:"Sort by start, min-heap of end times",desc:"Assign to room with smallest end ≤ start; else new room."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1661,name:"Factory Machines",        cat:"misc",catLabel:"Binary Search", approaches:[{title:"Binary search on time T",desc:"Check: can we make N items in time T? Sum ⌊T/machine[i]⌋ ≥ N."}],tcs:[{label:"O(N log(T))",tc:"O(N log(N·max))",note:""}]},
+  {id:1662,name:"Tasks and Deadlines",     cat:"misc",catLabel:"Greedy",        approaches:[{title:"Sort by duration ascending",desc:"Optimal to do shortest tasks first. Reward = Σ (deadline[i] − finish_time[i])."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1163,name:"Traffic Lights",          cat:"misc",catLabel:"Set",           approaches:[{title:"Ordered set + multiset of gaps",desc:"Maintain positions in sorted set. Each insertion splits one gap into two; update max gap via multiset."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1073,name:"Sliding Median",          cat:"misc",catLabel:"Two Heaps",     approaches:[{title:"Max-heap (lower) + min-heap (upper)",desc:"Balance heaps on each slide. Top of max-heap = median."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1076,name:"Sliding Cost",            cat:"misc",catLabel:"Two Heaps",     approaches:[{title:"Sliding median + sum tracking",desc:"Extend sliding median to track total cost using heap sums."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1077,name:"Movie Festival II",       cat:"misc",catLabel:"Greedy+Set",    approaches:[{title:"Sort by end, k-group assignment",desc:"For each movie, find group with latest end ≤ start using multiset upper_bound. Else skip."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+],
+
+dp: [
+  {id:1633,name:"Dice Combinations",    cat:"misc",catLabel:"DP",          approaches:[{title:"Count ways to sum to N",desc:"dp[i] = Σdp[i−j] for j=1..6. dp[0]=1."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1634,name:"Minimizing Coins",     cat:"misc",catLabel:"DP",          approaches:[{title:"Coin change — minimum coins",desc:"dp[i] = min(dp[i−c]+1) for each coin c."}],tcs:[{label:"O(N·C)",tc:"O(N·C)",note:""}]},
+  {id:1635,name:"Coin Combinations I",  cat:"misc",catLabel:"DP",          approaches:[{title:"Count ordered coin ways",desc:"Iterate sum outer, coins inner (ordered ways)."}],tcs:[{label:"O(N·C)",tc:"O(N·C)",note:""}]},
+  {id:1636,name:"Coin Combinations II", cat:"misc",catLabel:"DP",          approaches:[{title:"Count unordered coin ways",desc:"Iterate coins outer, sums inner (knapsack style)."}],tcs:[{label:"O(N·C)",tc:"O(N·C)",note:""}]},
+  {id:1637,name:"Removing Digits",      cat:"misc",catLabel:"DP",          approaches:[{title:"Min steps to reach 0",desc:"dp[n] = min(dp[n−d]+1) for each digit d of n."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1638,name:"Grid Paths",           cat:"misc",catLabel:"2D DP",       approaches:[{title:"Count paths avoiding traps",desc:"dp[i][j] = dp[i−1][j] + dp[i][j−1] if not blocked."}],tcs:[{label:"O(N²)",tc:"O(N²)",note:""}]},
+  {id:1158,name:"Book Shop",            cat:"misc",catLabel:"Knapsack",    approaches:[{title:"0/1 Knapsack",desc:"dp[w] = max value using ≤ w budget. Iterate in reverse."}],tcs:[{label:"O(N·W)",tc:"O(N·W)",note:""}]},
+  {id:1746,name:"Array Description",    cat:"misc",catLabel:"DP",          approaches:[{title:"DP on position × value",desc:"dp[i][v] = ways to fill position i with value v given constraints."}],tcs:[{label:"O(N·V)",tc:"O(N·V)",note:""}]},
+  {id:1639,name:"Edit Distance",        cat:"misc",catLabel:"DP",          approaches:[{title:"Levenshtein DP",desc:"dp[i][j] = min edits to convert s[0..i] to t[0..j]."}],tcs:[{label:"O(N·M)",tc:"O(N·M)",note:""}]},
+  {id:1744,name:"Rectangle Cutting",    cat:"misc",catLabel:"DP",          approaches:[{title:"DP on sub-rectangles",desc:"dp[a][b] = min cuts for a×b. Try all cuts."}],tcs:[{label:"O(A·B·(A+B))",tc:"O(A·B·(A+B))",note:""}]},
+  {id:1745,name:"Money Sums",           cat:"misc",catLabel:"Knapsack",    approaches:[{title:"Subset sum DP",desc:"dp[s] = can we make sum s? Classic 0/1 knapsack."}],tcs:[{label:"O(N·sum)",tc:"O(N·sum)",note:""}]},
+  {id:1097,name:"Removal Game",         cat:"misc",catLabel:"Interval DP", approaches:[{title:"Interval DP minimax",desc:"dp[l][r] = max score first player gets on [l..r]."}],tcs:[{label:"O(N²)",tc:"O(N²)",note:""}]},
+  {id:1140,name:"Projects",             cat:"misc",catLabel:"DP+Sort+BS",  approaches:[{title:"Sort by end + DP + binary search",desc:"dp[i] = max profit using projects ending at i. Binary search for last non-overlapping."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1653,name:"Elevator Rides",       cat:"misc",catLabel:"Bitmask DP",  approaches:[{title:"DP over subsets",desc:"dp[mask] = (min rides, min weight of last ride). Try adding each person."}],tcs:[{label:"O(2^N·N)",tc:"O(2^N·N)",note:"N≤20"}]},
+  {id:2181,name:"Counting Tilings",     cat:"misc",catLabel:"Profile DP",  approaches:[{title:"Broken profile DP",desc:"Process cells left-to-right, bitmask of current column boundary."}],tcs:[{label:"O(N·M·2^M)",tc:"O(N·M·2^M)",note:""}]},
+  {id:2220,name:"Counting Numbers",     cat:"misc",catLabel:"Digit DP",    approaches:[{title:"Digit DP — no adjacent equal",desc:"Count integers ≤ N with no two adjacent equal digits. DP on digits with tight flag."}],tcs:[{label:"O(digits·10)",tc:"O(digits·10)",note:""}]},
+],
+
+range: [
+  {id:1646,name:"Static Range Sum Queries",     cat:"misc",catLabel:"Prefix Sum",    approaches:[{title:"Prefix sums",desc:"prefix[i]=sum of first i. Query [l,r]=prefix[r]−prefix[l−1]."}],tcs:[{label:"O(N) build, O(1) query",tc:"O(1) per query",note:""}]},
+  {id:1647,name:"Static Range Minimum Queries", cat:"misc",catLabel:"Sparse Table",  approaches:[{title:"Sparse Table RMQ",desc:"sparse[j][i]=min of [i,i+2^j−1]. Query with two overlapping power-of-2 ranges."}],tcs:[{label:"O(N log N) build",tc:"O(1) query",note:""}]},
+  {id:1648,name:"Dynamic Range Sum Queries",    cat:"misc",catLabel:"BIT/Fenwick",   approaches:[{title:"Fenwick Tree",desc:"Point update + prefix sum query in O(log N)."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:1649,name:"Dynamic Range Min Queries",    cat:"misc",catLabel:"Segment Tree",  approaches:[{title:"Segment tree (point update)",desc:"Store min per range. Update leaf, propagate up."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:1650,name:"Range Xor Queries",            cat:"misc",catLabel:"Prefix XOR",    approaches:[{title:"Prefix XOR",desc:"xor[i]=XOR of first i. Query [l,r]=xor[r]^xor[l−1]."}],tcs:[{label:"O(N) build, O(1) query",tc:"O(1) per query",note:""}]},
+  {id:1651,name:"Range Update Queries",         cat:"misc",catLabel:"Diff Array+BIT",approaches:[{title:"Difference array in BIT",desc:"Range add [l,r]: two point updates. Point query: prefix sum."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:1652,name:"Forest Queries",               cat:"misc",catLabel:"2D Prefix Sum", approaches:[{title:"2D prefix sums",desc:"prefix[i][j]=trees in top-left sub-rect. Inclusion-exclusion for queries."}],tcs:[{label:"O(N²) build, O(1) query",tc:"O(1) per query",note:""}]},
+  {id:1735,name:"Hotel Queries",                cat:"misc",catLabel:"Seg Tree",       approaches:[{title:"Seg tree max + walk",desc:"Range-max query to find first hotel with enough rooms. Point update after assignment."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:1736,name:"List Removals",                cat:"misc",catLabel:"BIT Order Stat", approaches:[{title:"BIT-based k-th element",desc:"BIT of 1s. Binary search on prefix sums to find k-th, then set to 0."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:1737,name:"Salary Queries",               cat:"misc",catLabel:"BIT+Coord Comp",approaches:[{title:"Coordinate compress + BIT",desc:"Compress salary values. Range count query = prefix[b]−prefix[a−1]."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+],
+
+tree: [
+  {id:1674,name:"Subordinates",      cat:"dfs", catLabel:"DFS/Tree",       approaches:[{title:"Subtree sizes via DFS",desc:"DFS from root. subtree_size[v]−1 = subordinate count."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1675,name:"Tree Diameter",     cat:"dfs", catLabel:"2-BFS",          approaches:[{title:"Two BFS",desc:"BFS from any node → farthest u. BFS from u → farthest v. dist(u,v) = diameter."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1676,name:"Tree Distances I",  cat:"dfs", catLabel:"2-DFS",          approaches:[{title:"Two-pass DFS",desc:"First DFS: max dist in subtree. Second DFS: propagate upward distances from parent."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1677,name:"Tree Distances II", cat:"dfs", catLabel:"Rerooting DP",   approaches:[{title:"Rerooting technique",desc:"Root at 1, compute subtree sums. Reroot: derive answer[child] from answer[parent] in O(1)."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1678,name:"Company Queries I", cat:"misc",catLabel:"Binary Lifting", approaches:[{title:"Sparse table for k-th ancestor",desc:"anc[v][k]=2^k-th ancestor. Decompose query in binary."}],tcs:[{label:"O(N log N)",tc:"O(log N) query",note:""}]},
+  {id:1679,name:"Company Queries II",cat:"misc",catLabel:"LCA",            approaches:[{title:"LCA via binary lifting",desc:"Lift both nodes to same depth, then lift together until they meet."}],tcs:[{label:"O(N log N)",tc:"O(log N) query",note:""}]},
+  {id:1680,name:"Distance Queries",  cat:"misc",catLabel:"LCA",            approaches:[{title:"dist(u,v)=depth[u]+depth[v]−2·depth[LCA(u,v)]",desc:"Binary lifting LCA + depth array."}],tcs:[{label:"O(N log N)",tc:"O(log N) query",note:""}]},
+  {id:1681,name:"Counting Paths",    cat:"misc",catLabel:"LCA+Diff",       approaches:[{title:"Path difference array on tree",desc:"For each path (u,v): add 1 at u and v, subtract 1 at LCA and parent(LCA). DFS to sum."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1682,name:"Subtree Queries",   cat:"misc",catLabel:"Euler Tour+BIT", approaches:[{title:"Euler tour + BIT",desc:"Flatten tree with DFS timestamps. Subtree = contiguous range in tour. BIT for updates."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:1683,name:"Path Queries",      cat:"misc",catLabel:"HLD",            approaches:[{title:"Heavy-Light Decomposition",desc:"Decompose into chains. Root-to-node path = O(log N) chain queries."}],tcs:[{label:"O(N log N)",tc:"O(log² N) query",note:""}]},
+],
+
+math: [
+  {id:1082,name:"Two Sets",              cat:"misc",catLabel:"Math",         approaches:[{title:"N≡0 or 3 mod 4 check",desc:"Sum N(N+1)/2 must be even and divisible by 4 for valid partition to exist."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1079,name:"Exponentiation",        cat:"misc",catLabel:"Fast Exp",     approaches:[{title:"Binary exponentiation",desc:"a^(b/2) squared; handle odd exponent."}],tcs:[{label:"O(log b)",tc:"O(log b)",note:""}]},
+  {id:1080,name:"Exponentiation II",     cat:"misc",catLabel:"Euler's Thm",  approaches:[{title:"Euler's theorem recursive",desc:"a^(b^c) mod m. Compute b^c mod φ(m) recursively. Use Euler's theorem."}],tcs:[{label:"O(log² val)",tc:"O(log² val)",note:""}]},
+  {id:1081,name:"Counting Divisors",     cat:"misc",catLabel:"Factorization", approaches:[{title:"Trial division per number",desc:"Factorize each n by trial division. d(n) = ∏(eᵢ+1)."}],tcs:[{label:"O(N√N)",tc:"O(N√N)",note:""}]},
+  {id:1098,name:"Common Divisors",       cat:"misc",catLabel:"GCD",          approaches:[{title:"GCD of all elements",desc:"Common divisors = divisors of GCD of all elements."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:1099,name:"Divisor Analysis",      cat:"misc",catLabel:"Factorization", approaches:[{title:"Multiplicative count/sum/max",desc:"From prime factorization compute d(n) = ∏(eᵢ+1) and sum formula."}],tcs:[{label:"O(√N)",tc:"O(√N)",note:""}]},
+  {id:1712,name:"Prime Multiples",       cat:"misc",catLabel:"Inc-Exc",      approaches:[{title:"Inclusion-exclusion on prime subsets",desc:"Iterate all 2^k subsets of given primes. Alternate +/- by parity of subset size."}],tcs:[{label:"O(2^k)",tc:"O(2^k)",note:"k≤20"}]},
+  {id:1767,name:"Binomial Coefficients", cat:"misc",catLabel:"Modular Inv",  approaches:[{title:"Precompute factorials + inverse",desc:"C(n,k)=n!/(k!(n-k)!) mod p. Fermat's little theorem for modular inverse."}],tcs:[{label:"O(N) precomp",tc:"O(1) query",note:""}]},
+  {id:1769,name:"Fibonacci Numbers",     cat:"misc",catLabel:"Matrix Exp",   approaches:[{title:"Matrix exponentiation",desc:"[[1,1],[1,0]]^n gives Fib(n). Compute in O(log N)."}],tcs:[{label:"O(log N)",tc:"O(log N)",note:""}]},
+  {id:1096,name:"Throwing Dice",         cat:"misc",catLabel:"Matrix Exp",   approaches:[{title:"Linear recurrence → matrix",desc:"dp[n] = Σdp[n−k] for k=1..6. Represent as 6×6 matrix, exponentiate."}],tcs:[{label:"O(6³ log N)",tc:"O(log N)",note:""}]},
+],
+
+string: [
+  {id:1731,name:"Word Combinations",   cat:"misc",catLabel:"Trie+DP",      approaches:[{title:"Trie + DP",desc:"Build trie of dictionary. dp[i] = Σdp[i−|w|] for words w matching s[i−|w|..i]."}],tcs:[{label:"O(N·L)",tc:"O(N·L)",note:""}]},
+  {id:1753,name:"String Matching",     cat:"misc",catLabel:"KMP",          approaches:[{title:"Knuth-Morris-Pratt",desc:"Failure function for pattern. Single O(N+M) pass through text."}],tcs:[{label:"O(N+M)",tc:"O(N+M)",note:""}]},
+  {id:1754,name:"Finding Borders",     cat:"misc",catLabel:"KMP",          approaches:[{title:"KMP failure chain",desc:"failure[i] = longest proper border of prefix[0..i]. Walk chain from end."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1755,name:"Finding Periods",     cat:"misc",catLabel:"KMP",          approaches:[{title:"Period from failure function",desc:"Period p = n − failure[n−1] if n % p == 0."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1089,name:"Minimal Rotation",    cat:"misc",catLabel:"Booth's Algo", approaches:[{title:"Booth's algorithm",desc:"Lexicographically smallest rotation in O(N) on doubled string."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:2101,name:"Longest Palindrome",  cat:"misc",catLabel:"Manacher's",   approaches:[{title:"Manacher's algorithm",desc:"Compute max palindrome radius centered at each position in O(N)."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:1751,name:"Palindrome Queries",  cat:"misc",catLabel:"Hashing",      approaches:[{title:"Polynomial hashing + BIT",desc:"Two BITs for forward/backward hashes. Point update, range hash query."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:2112,name:"Finding Patterns",    cat:"misc",catLabel:"Aho-Corasick", approaches:[{title:"Aho-Corasick automaton",desc:"Trie of patterns with failure links. Single pass through text."}],tcs:[{label:"O(total+N)",tc:"O(total+N)",note:""}]},
+  {id:2113,name:"Counting Patterns",   cat:"misc",catLabel:"Aho-Corasick", approaches:[{title:"Aho-Corasick + suffix link sums",desc:"Count occurrences of each pattern using suffix link tree aggregation."}],tcs:[{label:"O(total+N)",tc:"O(total+N)",note:""}]},
+  {id:2114,name:"Pattern Positions",   cat:"misc",catLabel:"Suffix Array",  approaches:[{title:"Suffix array + binary search",desc:"For each pattern, binary search SA for range of matching suffixes."}],tcs:[{label:"O(N log N)",tc:"O(M log N) query",note:""}]},
+],
+
+geo: [
+  {id:2189,name:"Point Location Test",          cat:"misc",catLabel:"Cross Product", approaches:[{title:"Signed cross product",desc:"Sign of AB × AP: positive=left, negative=right, zero=on line."}],tcs:[{label:"O(1)",tc:"O(1)",note:""}]},
+  {id:2190,name:"Line Segment Intersection",    cat:"misc",catLabel:"Orientation",  approaches:[{title:"Orientation test",desc:"Endpoints of each segment straddle other segment via cross products."}],tcs:[{label:"O(1)",tc:"O(1)",note:""}]},
+  {id:2191,name:"Polygon Area",                 cat:"misc",catLabel:"Shoelace",     approaches:[{title:"Shoelace formula",desc:"|Σ(xᵢ·yᵢ₊₁ − xᵢ₊₁·yᵢ)| / 2."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:2192,name:"Point in Polygon",             cat:"misc",catLabel:"Ray Casting",  approaches:[{title:"Ray casting algorithm",desc:"Count rightward ray-edge crossings. Odd = inside."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:2193,name:"Polygon Lattice Points",       cat:"misc",catLabel:"Pick's Theorem",approaches:[{title:"Pick's theorem",desc:"A = I + B/2 − 1. Compute B = Σgcd(|Δx|,|Δy|) over edges. I = A − B/2 + 1."}],tcs:[{label:"O(N)",tc:"O(N)",note:""}]},
+  {id:2194,name:"Minimum Euclidean Distance",   cat:"misc",catLabel:"Closest Pair", approaches:[{title:"Divide and conquer",desc:"Split by median x. Recurse on halves. Strip check: ≤ 7 relevant points per row."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:2195,name:"Convex Hull",                  cat:"misc",catLabel:"Monotone Chain",approaches:[{title:"Andrew's monotone chain",desc:"Sort by (x,y). Build lower and upper hulls maintaining left turns."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+],
+
+advanced: [
+  {id:1143,name:"Hotel Queries",          cat:"misc",catLabel:"Seg Tree Walk",   approaches:[{title:"Seg tree walk for first ≥ k",desc:"Max segment tree. Walk down to find leftmost position ≥ k rooms."}],tcs:[{label:"O(N log N)",tc:"O(log N) per op",note:""}]},
+  {id:2080,name:"Shortest Subsequence",   cat:"misc",catLabel:"Greedy",          approaches:[{title:"Greedy missing character scan",desc:"Walk string; each pass extends covered prefix by finding missing char."}],tcs:[{label:"O(N·|Σ|)",tc:"O(N·|Σ|)",note:""}]},
+  {id:1750,name:"Counting Patterns",      cat:"misc",catLabel:"Aho-Corasick",    approaches:[{title:"Aho-Corasick + DP on automaton",desc:"DP over automaton states × length to count strings containing all patterns."}],tcs:[{label:"O(N·|Σ|)",tc:"O(N·|Σ|)",note:""}]},
+  {id:2084,name:"Reachable Nodes",        cat:"misc",catLabel:"DFS Order",       approaches:[{title:"DFS order + offline queries",desc:"Sort queries by DFS timestamp range. BIT for node-in-subtree queries."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+  {id:2086,name:"Reachability Queries",   cat:"misc",catLabel:"DAG+Bitset",      approaches:[{title:"Bitset DP on DAG",desc:"dp[v] = OR of dp[children] | {v}. Query: dp[u] has bit v set iff v reachable."}],tcs:[{label:"O(N²/64)",tc:"O(N²/64)",note:"bitset"}]},
+],
+
+additional: [
+  {id:1172,name:"Counting Bits",          cat:"misc",catLabel:"Math",    approaches:[{title:"Sum of popcount(i) for i in [1,N]",desc:"Use digit DP or bit-by-bit contribution."}],tcs:[{label:"O(log N)",tc:"O(log N)",note:""}]},
+  {id:2220,name:"Longest Increasing Subseq.", cat:"misc",catLabel:"DP+BIT",approaches:[{title:"O(N log N) LIS",desc:"Patience sort / BIT over compressed values. dp[i] = LIS ending at position i."}],tcs:[{label:"O(N log N)",tc:"O(N log N)",note:""}]},
+],
+
+};
+
+// ── State ──────────────────────────────────────────────────
+const SK_SECTION = 'cses_rev_section';
+const SK_OPEN    = 'cses_rev_open';
+const SK_HINT    = 'cses_rev_hints';
+
+let currentSection = localStorage.getItem(SK_SECTION) || 'graph';
+let openState  = (()=>{try{return JSON.parse(localStorage.getItem(SK_OPEN)||'{}')}catch{return {}}})();
+let hintState  = (()=>{try{return JSON.parse(localStorage.getItem(SK_HINT)||'{}')}catch{return {}}})();
+
+function persist() {
+  localStorage.setItem(SK_SECTION, currentSection);
+  localStorage.setItem(SK_OPEN,    JSON.stringify(openState));
+  localStorage.setItem(SK_HINT,    JSON.stringify(hintState));
+}
+
+// ── Build dropdown ─────────────────────────────────────────
+function buildDropdown() {
+  const sel = document.getElementById('section-picker');
+  SECTIONS.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.key; o.textContent = s.label;
+    if (s.key === currentSection) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function onSectionChange(key) {
+  currentSection = key;
+  persist();
+  renderSection();
+}
+
+// ── Render section ─────────────────────────────────────────
+function renderSection() {
+  const problems = PROBLEMS[currentSection] || [];
+  const label    = SECTIONS.find(s => s.key === currentSection)?.label || '';
+
+  document.title = `CSES — ${label}`;
+  document.getElementById('section-meta').innerHTML =
+    `<strong>${problems.length}</strong> problem${problems.length !== 1 ? 's' : ''}`;
+  document.getElementById('total-count').textContent = problems.length;
+
+  const tbody = document.getElementById('problem-table');
+  tbody.innerHTML = '';
+
+  problems.forEach((p, i) => {
+    const rid = `${currentSection}__${p.id}__${i}`;
+
+    // problem row
+    const pr = document.createElement('tr');
+    pr.className = 'problem-row'; pr.id = 'pr-' + rid;
+    pr.innerHTML = `
+      <td class="num">${String(i+1).padStart(2,'0')}</td>
+      <td class="prob-name"><a href="https://cses.fi/problemset/task/${p.id}" target="_blank">${p.name}</a></td>
+      <td class="cat-cell"><span class="cat cat-${p.cat}">${p.catLabel}</span></td>
+      <td><div class="btn-group">
+        ${p.hints ? `<button class="hint-toggle" id="ht-${rid}" onclick="toggleHint('${rid}')"><i class="hchev">›</i> Hint</button>` : ''}
+        <button class="toggle-btn" id="tb-${rid}" onclick="toggleRow('${rid}')"><i class="schev">›</i> Reveal</button>
+      </div></td>`;
+
+    // hint row
+    const hr = document.createElement('tr');
+    hr.className = 'hint-row'; hr.id = 'hr-' + rid;
+    const stepsHTML = (p.hints||[]).map((h,idx)=>
+      `<div class="hint-step"><div class="hint-num">${idx+1}</div><div class="hint-text">${h}</div></div>`
+    ).join('');
+    hr.innerHTML = `<td colspan="4"><div class="hint-row-inner">
+      <div class="hint-row-title">💡 Hints</div>${stepsHTML}</div></td>`;
+
+    // solution row
+    const approachHTML = p.approaches.map(a=>
+      `<div class="approach-block">
+        <div class="approach-title">${a.title}</div>
+        <div class="approach-desc">${a.desc}</div>
+      </div>`).join('');
+    const tcHTML = p.tcs.map(t=>
+      `<div class="tc-block">
+        <div class="tc-label">${t.label}</div>
+        <div class="tc-value">${t.tc}</div>
+        ${t.note?`<div class="tc-note">${t.note}</div>`:''}
+        ${t.explain?`<div class="tc-explain">${t.explain}</div>`:''}
+      </div>`).join('');
+
+    const dr = document.createElement('tr');
+    dr.className = 'detail-row'; dr.id = 'dr-' + rid;
+    dr.innerHTML = `<td colspan="4"><div class="detail-inner">
+      <div class="detail-section"><h3>Approach</h3>${approachHTML}</div>
+      <div class="detail-section"><h3>Time Complexity</h3>${tcHTML}</div>
+    </div></td>`;
+
+    tbody.appendChild(pr);
+    tbody.appendChild(hr);
+    tbody.appendChild(dr);
+    applyRowState(rid);
+  });
+
+  updateCounter();
+}
+
+function applyRowState(rid) {
+  const pr  = document.getElementById('pr-'  + rid);
+  const hr  = document.getElementById('hr-'  + rid);
+  const dr  = document.getElementById('dr-'  + rid);
+  const tb  = document.getElementById('tb-'  + rid);
+  const ht  = document.getElementById('ht-'  + rid);
+  if (!pr) return;
+
+  const isOpen = !!openState[rid];
+  const isHint = !!hintState[rid];
+
+  pr.classList.toggle('is-open',    isOpen);
+  pr.classList.toggle('hint-open',  isHint && !isOpen);
+  hr.classList.toggle('open',       isHint);
+  dr.classList.toggle('open',       isOpen);
+
+  if (tb) tb.innerHTML = isOpen
+    ? '<i class="schev">›</i> Hide'
+    : '<i class="schev">›</i> Reveal';
+
+  if (ht) ht.classList.toggle('active', isHint);
+}
+
+function toggleRow(rid) {
+  openState[rid] = !openState[rid];
+  persist(); applyRowState(rid); updateCounter();
+}
+
+function toggleHint(rid) {
+  hintState[rid] = !hintState[rid];
+  persist(); applyRowState(rid);
+}
+
+function toggleAll(show) {
+  const problems = PROBLEMS[currentSection] || [];
+  problems.forEach((p,i) => {
+    const rid = `${currentSection}__${p.id}__${i}`;
+    openState[rid] = show;
+  });
+  persist();
+  problems.forEach((p,i) => applyRowState(`${currentSection}__${p.id}__${i}`));
+  updateCounter();
+}
+
+function updateCounter() {
+  const problems = PROBLEMS[currentSection] || [];
+  let c = 0;
+  problems.forEach((p,i) => { if (openState[`${currentSection}__${p.id}__${i}`]) c++; });
+  document.getElementById('open-count').textContent = c;
+}
+
+buildDropdown();
+renderSection();
+</script>
+</body>
+</html>
